@@ -83,7 +83,8 @@ run `./gradlew assembleDebug` (Mac/Linux)
 
 ###Attributes
 
-There are several attributes u can set
+There are several attributes u can set:
+
 ![](http://ww2.sinaimg.cn/mw690/610dc034jw1efyttukr1zj20eg04bmx9.jpg)
 
 The **readched area** and **unreached area**:

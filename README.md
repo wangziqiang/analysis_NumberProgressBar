@@ -4,9 +4,9 @@ this repository is analysis of NumberProgressBar from [daimajia](https://github.
 ---
 There are some other platform's NumberProgressBar:
 
--[Web-Front](https://github.com/kalasoo/NumberProgressBar) by [kalasoo](https://github.com/kalasoo/NumberProgressBar)
--[IOS](https://github.com/Ming-Zhe/NumberProgressBar) by [Ming-Zhe](https://github.com/Ming-Zhe/NumberProgressBar)
--[Windows Phone](https://github.com/s2003zy/NumberProgressBar) by [s2003zy](https://github.com/s2003zy/NumberProgressBar)
+- [Web-Front](https://github.com/kalasoo/NumberProgressBar) by [kalasoo](https://github.com/kalasoo/NumberProgressBar)
+- [IOS](https://github.com/Ming-Zhe/NumberProgressBar) by [Ming-Zhe](https://github.com/Ming-Zhe/NumberProgressBar)
+- [Windows Phone](https://github.com/s2003zy/NumberProgressBar) by [s2003zy](https://github.com/s2003zy/NumberProgressBar)
 
 ---
 ###Demo
@@ -89,18 +89,18 @@ There are several attributes u can set
 The **readched area** and **unreached area**:
 
 * color
-*height
+* height
 
 The **text area**:
 
 * color
-*text size
+* text size
 * visibility
 * distance between **reached area** and **unreached area**
 
 The **bar**:
-*max progress
-*current progress
+* max progress
+* current progress
 
 for example, the default style:
 

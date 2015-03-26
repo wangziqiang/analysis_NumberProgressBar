@@ -4,6 +4,7 @@ package com.sf.wzq.view;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -19,7 +20,7 @@ import com.sf.wzq.analysis_numberprogressbar.R;
  * <ul>1,初始化
  * <li>属性参数:在values目录下建立attrs.xml文件，添加需要的属性</li>
  * <li>在构造方法中获取自定义的参数，并设置默认值</li>
- * <li>画笔</li>
+ * <li>画笔:reached bar's;unreached bar's;text's</li>
  * </ul>
  * <ul>2,onMeasure</ul>
  * <ul>3,onDraw</ul>
@@ -91,9 +92,14 @@ public class NumberProgressBar extends View {
      */
     private final float default_text_offset;
 
-    private int default_text_visibile = 0;
+    private int default_text_visible = 0;
 
     private boolean mIfDrawText = true;
+
+    //initialize some painters
+    private Paint mReachedBarPaint;
+    private Paint mUnreachedBarPaint;
+    private Paint mTextPaint;
 
     public NumberProgressBar(Context context) {
 //        super(context);
@@ -135,8 +141,8 @@ public class NumberProgressBar extends View {
         //8,text color
         mTextColor = arr.getColor(R.styleable.NumberProgressBar_progress_text_color, default_text_color);
         //9,text visibility
-        int _drawText = arr.getInt(R.styleable.NumberProgressBar_progress_text_visibility, default_text_visibile);
-        if (_drawText != default_text_visibile) {
+        int _drawText = arr.getInt(R.styleable.NumberProgressBar_progress_text_visibility, default_text_visible);
+        if (_drawText != default_text_visible) {
             mIfDrawText = false;
         }
         arr.recycle();
@@ -147,7 +153,15 @@ public class NumberProgressBar extends View {
      * initialize some painters TODO
      */
     private void initializePainters() {
+        mReachedBarPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mReachedBarPaint.setColor(mReachedBarColor);
 
+        mUnreachedBarPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mUnreachedBarPaint.setColor(mUnreachedBarColor);
+
+        mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mTextPaint.setColor(mTextColor);
+        mTextPaint.setTextSize(mTextSize);
     }
 
     private float dp2px(float dp) {

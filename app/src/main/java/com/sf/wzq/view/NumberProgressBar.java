@@ -149,6 +149,16 @@ public class NumberProgressBar extends View {
         initializePainters();
     }
 
+    @Override
+    protected int getSuggestedMinimumWidth() {
+        return (int) mTextSize;
+    }
+
+    @Override
+    protected int getSuggestedMinimumHeight() {
+        return (int) Math.max(mTextSize,Math.max(mReachedHeight,mUnreachedHeight));
+    }
+
     /**
      * initialize some painters TODO
      */

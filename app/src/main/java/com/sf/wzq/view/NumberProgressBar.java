@@ -159,6 +159,12 @@ public class NumberProgressBar extends View {
         return (int) Math.max(mTextSize,Math.max(mReachedHeight,mUnreachedHeight));
     }
 
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        // TODO
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
     /**
      * initialize some painters TODO
      */

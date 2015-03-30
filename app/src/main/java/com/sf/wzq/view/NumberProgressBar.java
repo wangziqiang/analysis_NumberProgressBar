@@ -163,6 +163,24 @@ public class NumberProgressBar extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // TODO
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        setMeasuredDimension(measure(widthMeasureSpec,true),measure(widthMeasureSpec,false));
+    }
+    private int measure(int spec,boolean isWidth){
+        int result ;
+        int mode = MeasureSpec.getMode(spec);
+        int size = MeasureSpec.getSize(spec);
+        int padding = isWidth?getPaddingLeft()+getPaddingRight():getPaddingTop()+getPaddingBottom();
+        if(mode == MeasureSpec.EXACTLY){
+            return size;
+        }else{
+            result = isWidth?getSuggestedMinimumWidth():getSuggestedMinimumHeight();
+            result += padding;
+            if(mode == MeasureSpec.AT_MOST){
+                result = isWidth?Math.max(result,size):Math.min(result,size);
+            }
+        }
+
+        return size;
     }
 
     /**

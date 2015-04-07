@@ -3,8 +3,10 @@ package com.sf.wzq.view;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -20,7 +22,7 @@ import com.sf.wzq.analysis_numberprogressbar.R;
  * <ul>1,初始化
  * <li>属性参数:在values目录下建立attrs.xml文件，添加需要的属性</li>
  * <li>在构造方法中获取自定义的参数，并设置默认值</li>
- * <li>画笔:reached bar's;unreached bar's;text's</li>
+ * <li>画笔:reached bar's;unreached bar's;text's</li>s
  * </ul>
  * <ul>2,onMeasure</ul>
  * <ul>3,onDraw</ul>
@@ -95,12 +97,19 @@ public class NumberProgressBar extends View {
     private int default_text_visible = 0;
 
     private boolean mIfDrawText = true;
-
+    private boolean mDrawReachBar = true;
+    private boolean mDrawUnReachBar = true;
     //initialize some painters
     private Paint mReachedBarPaint;
     private Paint mUnreachedBarPaint;
     private Paint mTextPaint;
 
+    private String mPrefix="";
+    private String mSuffix="%";
+    private float mDrawTextWidth = 0;
+    private float mOffset;// the offset between bar and text
+
+    // TODO
     public NumberProgressBar(Context context) {
 //        super(context);
         this(context, null);
@@ -124,10 +133,7 @@ public class NumberProgressBar extends View {
 
         TypedArray arr = context.getTheme().obtainStyledAttributes(attrs, R.styleable.NumberProgressBar, defStyleAttr, 0);
         //获取用户在xml中填写的属性值
-        //1，当前progress
-        setCurrentProgress(arr.getInt(R.styleable.NumberProgressBar_progress_current, 0));
-        //2，最大progress
-        setMaxProgress(arr.getInt(R.styleable.NumberProgressBar_progress_max, 100));
+
         //3，reached color
         mReachedBarColor = arr.getColor(R.styleable.NumberProgressBar_progress_reached_color, default_reached_color);
         //4, unreached color
@@ -140,11 +146,19 @@ public class NumberProgressBar extends View {
         mTextSize = arr.getDimension(R.styleable.NumberProgressBar_progress_text_size, default_text_size);
         //8,text color
         mTextColor = arr.getColor(R.styleable.NumberProgressBar_progress_text_color, default_text_color);
+        // the offset between bar and text
+        mOffset = arr.getDimension(R.styleable.NumberProgressBar_progress_text_offset, default_text_offset);
         //9,text visibility
         int _drawText = arr.getInt(R.styleable.NumberProgressBar_progress_text_visibility, default_text_visible);
         if (_drawText != default_text_visible) {
             mIfDrawText = false;
         }
+
+        //当前progress
+        setProgress(arr.getInt(R.styleable.NumberProgressBar_progress_current, 0));
+        //最大progress
+        setMaxProgress(arr.getInt(R.styleable.NumberProgressBar_progress_max, 100));
+
         arr.recycle();
         initializePainters();
     }
@@ -161,7 +175,6 @@ public class NumberProgressBar extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        // TODO
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         setMeasuredDimension(measure(widthMeasureSpec,true),measure(widthMeasureSpec,false));
     }
@@ -179,12 +192,82 @@ public class NumberProgressBar extends View {
                 result = isWidth?Math.max(result,size):Math.min(result,size);
             }
         }
-
         return size;
+    }
+    private RectF mReachedRectF = new RectF(0,0,0,0);
+    private RectF mUnReachedRectF = new RectF(0,0,0,0);
+    private String mCurrentDrawText;
+    private float mDrawTextStart,mDrawTextEnd;
+    @Override
+    protected void onDraw(Canvas canvas) {
+        // TODO
+        if(mIfDrawText){
+            drawWithText();
+            canvas.drawText(mCurrentDrawText,mDrawTextStart,mDrawTextEnd,mTextPaint);
+        }else{
+            drawWithoutText();
+        }
+        if(mDrawReachBar){
+            canvas.drawRect(mReachedRectF,mReachedBarPaint);
+        }
+        if(mDrawUnReachBar){
+            canvas.drawRect(mUnReachedRectF,mUnreachedBarPaint);
+        }
+        super.onDraw(canvas);
+    }
+    private void drawWithoutText() {
+        // calculate reachBar
+        mReachedRectF.left = getPaddingLeft();
+        mReachedRectF.top = getHeight() / 2 - mReachedHeight / 2;
+        mReachedRectF.right = (getWidth() - getPaddingLeft() - getPaddingRight()) * getProgress() / getMax() + getPaddingLeft();
+        mReachedRectF.bottom = getHeight() / 2 + mReachedHeight / 2;
+        // calculate unReachBar
+        mUnReachedRectF.left =  mReachedRectF.right;
+        mUnReachedRectF.top = getHeight() / 2 - mUnreachedHeight /2 ;
+        mUnReachedRectF.right = getWidth() - getPaddingRight();
+        mUnReachedRectF.bottom = getHeight() / 2 + mUnreachedHeight /2 ;
+    }
+
+    private void drawWithText() {
+        // draw the text
+        mCurrentDrawText = String.format("%d",getProgress() * 100 / getMax());
+        mCurrentDrawText = mPrefix + mCurrentDrawText + mSuffix;
+        mDrawTextWidth = mTextPaint.measureText(mCurrentDrawText);
+
+        // draw the reachBar
+        if(getProgress() == 0){
+            mDrawReachBar = false;
+            mDrawTextStart = getPaddingLeft();
+        }else{
+            mDrawReachBar = true;
+            mReachedRectF.left = getPaddingLeft();
+            mReachedRectF.top = getHeight() / 2 - mReachedHeight / 2;
+            mReachedRectF.right = (getWidth() - getPaddingLeft() - getPaddingRight() ) * getProgress() / getMax() - mOffset + getPaddingLeft();
+            mReachedRectF.bottom = getHeight() / 2 + mReachedHeight / 2;
+            mDrawTextStart = mReachedRectF.right + mOffset;
+        }
+        mDrawTextEnd = getHeight() / 2 - (mTextPaint.descent() + mTextPaint.ascent()) / 2;
+
+        if((mDrawTextStart + mDrawTextWidth) >= (getWidth() - getPaddingRight())){
+            mDrawTextStart = getWidth() - getPaddingRight() - mDrawTextWidth;
+            mReachedRectF.right = mDrawTextStart - mOffset;
+        }
+
+        // draw the unReachBar
+        float unReachBarStart = mDrawTextStart + mDrawTextWidth + mOffset;
+        if(unReachBarStart >= getWidth() - getPaddingRight()){
+            mDrawUnReachBar = false;
+        }else{
+            mDrawUnReachBar = true;
+            mUnReachedRectF.left = unReachBarStart;
+            mUnReachedRectF.top = getHeight() / 2 - mUnreachedHeight / 2;
+            mUnReachedRectF.right = getWidth() - getPaddingRight();
+            mUnReachedRectF.bottom = getHeight() / 2 + mUnreachedHeight / 2;
+        }
     }
 
     /**
-     * initialize some painters TODO
+     * initialize some painters
      */
     private void initializePainters() {
         mReachedBarPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -198,17 +281,11 @@ public class NumberProgressBar extends View {
         mTextPaint.setTextSize(mTextSize);
     }
 
-    private float dp2px(float dp) {
-        float scale = getResources().getDisplayMetrics().density;
-        return dp * scale + 0.5f;
+    public int getProgress() {
+        return mCurrentProgress;
     }
 
-    private float sp2px(float sp) {
-        float scale = getResources().getDisplayMetrics().scaledDensity;
-        return scale * sp;
-    }
-
-    private int getMax() {
+    public int getMax() {
         return mMaxProgress;
     }
 
@@ -218,12 +295,24 @@ public class NumberProgressBar extends View {
             invalidate();
         }
     }
-
-    private void setCurrentProgress(int progress) {
-        if (progress < getMax() && progress > 0) {
+    public void increaseProgressBy(int by){
+        if(by > 0){
+            setProgress(getProgress() + by);
+        }
+    }
+    private void setProgress(int progress) {
+        if (progress <= getMax() && progress > 0) {
             this.mCurrentProgress = progress;
             invalidate();
         }
     }
+    private float dp2px(float dp) {
+        float scale = getResources().getDisplayMetrics().density;
+        return dp * scale + 0.5f;
+    }
 
+    private float sp2px(float sp) {
+        float scale = getResources().getDisplayMetrics().scaledDensity;
+        return scale * sp;
+    }
 }
